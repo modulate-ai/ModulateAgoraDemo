@@ -1,0 +1,3 @@
+let AppID: String = "" // your app id here
+// assign Token to nil if you have not enabled app certificate
+let Token: String? = nil
