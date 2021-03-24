@@ -1,5 +1,10 @@
 #import <Foundation/Foundation.h>
-#import <AgoraAudioKit/IAgoraRtcEngine.h>
+
+// Ignore all warnings in agora headers
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Weverything"
+#import <AgoraRtcKit/IAgoraRtcEngine.h>
+#pragma clang diagnostic pop
 
 #import "VoiceSkin.h"
 #include "ModulateAgoraInterface.h"
@@ -22,13 +27,13 @@
 
     // Calculate the max frame size in samples for the voice skins, at the internal modulate sample rate
     double frame_size_in_ms = (double)max_frame_size / ((double)expected_sample_rate / 1000.0);
-    unsigned int modulate_max_frame_size = (unsigned int)ceil((MODULATE_INTERNAL_SAMPLE_RATE/1000.0) * frame_size_in_ms);
+    unsigned int modulate_max_frame_size = (unsigned int)ceil(MODULATE_INTERNAL_SAMPLE_RATE/1000.0 * frame_size_in_ms);
 
     // Create all of the voice skin objects, loading them from the .mod voice skin files and authenticating them
     // via the API key with Modulate's authentication server
     skin_names = [[NSArray alloc]
-                  initWithObjects:@"sarena_2020_03_25",
-                  @"daniel_2020_03_25",
+                  initWithObjects:@"alisha",
+                  @"daniel",
                   nil];
     voice_skin_map = [[NSMutableDictionary alloc] initWithCapacity:[skin_names count]];
     for (NSString* name in skin_names) {

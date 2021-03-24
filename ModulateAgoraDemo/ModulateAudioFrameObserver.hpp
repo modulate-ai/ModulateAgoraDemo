@@ -1,7 +1,12 @@
 #ifndef ModulateAudioFrameObserver_hpp
 #define ModulateAudioFrameObserver_hpp
 
-#include <AgoraAudioKit/IAgoraMediaEngine.h>
+// Ignore all warnings in agora headers
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Weverything"
+#include <AgoraRtcKit/IAgoraMediaEngine.h>
+#pragma clang diagnostic pop
+
 #include <stdio.h>
 #include <chrono>
 

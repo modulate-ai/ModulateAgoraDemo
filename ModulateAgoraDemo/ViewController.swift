@@ -1,5 +1,5 @@
 import UIKit
-import AgoraAudioKit
+import AgoraRtcKit
 
 class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSource, UITextFieldDelegate {
 

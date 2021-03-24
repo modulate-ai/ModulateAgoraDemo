@@ -116,15 +116,15 @@
         @try {
             NSError *error;
             NSDictionary *responseData = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:&error];
-
             NSString* signed_respose = responseData[@"signed_response"];
-            const char* auth_check = [signed_respose UTF8String];
-            bool success = responseData[@"success"];
+            bool success = ([responseData[@"success"] boolValue] == YES);
             NSLog(@"Authentication succeeded? %s", success ? "true" : "false");
             if(!success) {
+                NSLog(@"Response Data: %@", responseData);
                 [self showAlert:@"Failed to authenticate with Modulate server - please ensure that you are connected to the internet."];
                 return;
             }
+            const char* auth_check = [signed_respose UTF8String];
 
             if(auth_check) {
                 int error_code2 = modulate_voice_skin_check_authentication_message(self->_raw_voice_skin, auth_check);

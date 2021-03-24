@@ -1,5 +1,13 @@
-#ifndef __MODULATE_H__
-#define __MODULATE_H__
+#ifndef MODULATE_H
+#define MODULATE_H
+
+#ifdef MODULATE_EXPORT_DLL
+#define MODULATE_DEF_PREFIX __declspec(dllexport)
+#elif defined(MODULATE_IMPORT_DLL)
+#define MODULATE_DEF_PREFIX __declspec(dllimport)
+#else
+#define MODULATE_DEF_PREFIX
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -9,20 +17,20 @@ extern "C" {
   This file is Confidential and Proprietary to Modulate, Inc.
   This file may not be shared or distributed without permission from Modulate.
   Email contact@modulate.ai with requests, bug reports, or questions!
-  Last updated May 07, 2020.
+  Last updated January 13, 2021.
 */
 
 // The version of the modulate library - this updates anytime
 // Modulate ships a new libmodulate.a with bugfixes, performance improvements,
 // API changes, etc.
-#define MODULATE_VERSION 20200507
+#define MODULATE_VERSION 20210113
 
 // The voice skin neural network version.  This updates when there is an
 // architectural change to the voice skin models that Modulate builds, which
 // are not backwards compatible with older versions of the library
 // A voice skin file with a newer version will not be compatible
 // with an older library
-#define MODULATE_VOICE_SKIN_VERSION 20191030
+#define MODULATE_VOICE_SKIN_VERSION 20200606
 
 // Modulate voice skins convert streams of 24kHz audio samples (floating point format,
 // with sample values in [-1, 1]) to output audio streams in the same format.
@@ -56,13 +64,13 @@ extern "C" {
 //   error_code = modulate_voice_skin_reset(voice_skin);
 //   if(error_code)
 //     exit(1);  // Couldn't reset the voice skin - abort!
-int modulate_voice_skin_create(unsigned int max_frame_size,
-                               const char* filename,
-                               void** voice_skin_ptr);
+MODULATE_DEF_PREFIX int modulate_voice_skin_create(unsigned int max_frame_size,
+                                                   const char* filename,
+                                                   void** voice_skin_ptr);
 
 // deallocates the internal memory for the voice skin,
 // and sets *voice_skin_ptr = 0;
-int modulate_voice_skin_destroy(void** voice_skin_ptr);
+MODULATE_DEF_PREFIX int modulate_voice_skin_destroy(void** voice_skin_ptr);
 
 
 // Parameters for customizing Modulate's voice outputs.  These values
@@ -71,7 +79,7 @@ int modulate_voice_skin_destroy(void** voice_skin_ptr);
 // of a voice skin by the end user.
 // For each parameter, a 0 value applies no effect
 // (and in fact skips that code altogether), while a 1 value is the full filter
-typedef struct {
+MODULATE_DEF_PREFIX typedef struct {
   // The Radio filter is a band-limiting filter which mimics a radio broadcast
   float radio_strength;
 
@@ -110,10 +118,8 @@ typedef struct {
   int disable_postfilter;
 } modulate_parameters;
 
-static inline modulate_parameters modulate_build_default_parameters_struct() {
-  modulate_parameters params = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0, 0, 0};
-  return params;
-}
+// Creates a default modulate_parameters struct, with all memebers initialized to 0
+MODULATE_DEF_PREFIX modulate_parameters modulate_build_default_parameters_struct(void);
 
 // generate takes frame_size samples from input_audio in the input speaker's
 // voice and converts them to frame_size samples in the voice skin's voice.
@@ -125,23 +131,23 @@ static inline modulate_parameters modulate_build_default_parameters_struct() {
 // IMPORTANT: This function cannot be run unless the voice skin is authenticated!
 // Please see modulate_voice_skin_create_authentication_message and
 // modulate_voice_skin_check_authentication_message for details
-int modulate_voice_skin_generate(void* voice_skin,
-                                 const float* input_audio,
-                                 unsigned int frame_size,
-                                 float* output_audio,
-                                 const modulate_parameters* parameters);
+MODULATE_DEF_PREFIX int modulate_voice_skin_generate(void* voice_skin,
+                                                     const float* input_audio,
+                                                     unsigned int frame_size,
+                                                     float* output_audio,
+                                                     const modulate_parameters* parameters);
 
 // Call reset before running generate on a new audio stream
 // This resets the internal state to its default, which is the same
 // as if it had been running on all-zeros input for a long time.
 // This must also be called *before generate is used for the first time*
-int modulate_voice_skin_reset(void* voice_skin);
+MODULATE_DEF_PREFIX int modulate_voice_skin_reset(void* voice_skin);
 
 // Returns the internal max_frame_size, which is the maximum size of
 // audio frames at 24kHz converted by the voice skin.
 // This is the same value that was passed into modulate_voice_skin_create
-int modulate_voice_skin_get_max_frame_size(void* voice_skin,
-                                             unsigned int* max_frame_size);
+MODULATE_DEF_PREFIX int modulate_voice_skin_get_max_frame_size(void* voice_skin,
+                                                               unsigned int* max_frame_size);
 
 #define MODULATE_AUTHENTICATION_MESSAGE_LENGTH 618 // chars for (2^2048-1) in base 10
 // Given an API key, create an authentication message to be validated by Modulate's
@@ -156,10 +162,10 @@ int modulate_voice_skin_get_max_frame_size(void* voice_skin,
 //                          voice_skin, api_key, msg, sizeof(msg));
 //     if(error_code)
 //       exit(error_code);
-int modulate_voice_skin_create_authentication_message(void* voice_skin,
-                                                      const char* api_key,
-                                                      char* message,
-                                                      unsigned int message_length);
+MODULATE_DEF_PREFIX int modulate_voice_skin_create_authentication_message(void* voice_skin,
+                                                                          const char* api_key,
+                                                                          char* message,
+                                                                          unsigned int message_length);
 
 // This function enables the voice skin to be used, by passing in a validated
 // authentication check message from Modulate's authentication server.
@@ -170,28 +176,28 @@ int modulate_voice_skin_create_authentication_message(void* voice_skin,
 // authentication messages, so please only create one authentication message per
 // voice skin, validate it with Modulate's server, and then pass the response
 // into this function.
-int modulate_voice_skin_check_authentication_message(void* voice_skin,
-                                                     const char* message);
+MODULATE_DEF_PREFIX int modulate_voice_skin_check_authentication_message(void* voice_skin,
+                                                                         const char* message);
 
 // This function checks whether the voice skin has been authenticated yet,
 // and puts 0 into is_authenticated if not, 1 into is_authenticated if so
-int modulate_voice_skin_check_authenticated(void* voice_skin,
-                                            int* is_authenticated);
+MODULATE_DEF_PREFIX int modulate_voice_skin_check_authenticated(void* voice_skin,
+                                                                int* is_authenticated);
 
 #define MODULATE_SKIN_NAME_MAX_LENGTH 111 // Max skin name length is 110, plus \0
 // Get the name associated with this voice skin, and put it in *name
 // name should point to a buffer sized at least MODULATE_SKIN_NAME_MAX_LENGTH chars
-int modulate_voice_skin_get_skin_name(void* voice_skin, char* name);
+MODULATE_DEF_PREFIX int modulate_voice_skin_get_skin_name(void* voice_skin, char* name);
 
 // Get the value of MODULATE_VERSION that this library was compiled with
-unsigned int modulate_get_version(void);
+MODULATE_DEF_PREFIX unsigned int modulate_get_version(void);
 
 // Get the value of MODULATE_VOICE_SKIN_VERSION that this library was compiled with
-unsigned int modulate_get_voice_skin_version(void);
+MODULATE_DEF_PREFIX unsigned int modulate_get_voice_skin_version(void);
 
 // Enable the internal logger to create a text log file in log_dir
 // and begin writing log messages to it
-int modulate_start_text_logging_in_directory(const char* log_dir);
+MODULATE_DEF_PREFIX int modulate_start_text_logging_in_directory(const char* log_dir);
 
 /*-----------High Level API-----------*/
 // This high-level API is intended to take care of sample rate
@@ -214,12 +220,12 @@ int modulate_start_text_logging_in_directory(const char* log_dir);
 // modulate_voice_skin_create.
 // A pointer to the allocated voice skin helper will be placed in
 // voice_skin_helper
-int modulate_voice_skin_helper_create(void** voice_skin_helper,
-                                      unsigned int max_frame_size);
+MODULATE_DEF_PREFIX int modulate_voice_skin_helper_create(void** voice_skin_helper,
+                                                          unsigned int max_frame_size);
 
 // deallocates the internal memory for the voice skin helper,
 // and sets *voice_skin_helper = 0;
-int modulate_voice_skin_helper_destroy(void** voice_skin_helper);
+MODULATE_DEF_PREFIX int modulate_voice_skin_helper_destroy(void** voice_skin_helper);
 
 // generate takes frame_size samples from input_audio in the input speaker's
 // voice and converts them to frame_size samples in the voice skin's voice.
@@ -231,13 +237,13 @@ int modulate_voice_skin_helper_destroy(void** voice_skin_helper);
 // IMPORTANT: This function cannot be run unless the voice skin is authenticated!
 // Please see modulate_voice_skin_create_authentication_message and
 // modulate_voice_skin_check_authentication_message for details
-int modulate_voice_skin_helper_generate(void* voice_skin,
-                                        void* voice_skin_helper,
-                                        const float* input_audio,
-                                        float* output_audio,
-                                        unsigned int num_samples,
-                                        unsigned int sample_rate,
-                                        const modulate_parameters* parameters);
+MODULATE_DEF_PREFIX int modulate_voice_skin_helper_generate(void* voice_skin,
+                                                            void* voice_skin_helper,
+                                                            const float* input_audio,
+                                                            float* output_audio,
+                                                            unsigned int num_samples,
+                                                            unsigned int sample_rate,
+                                                            const modulate_parameters* parameters);
 
 // Call reset before running generate on a new audio stream
 // This resets the internal state to its default, which is the same
@@ -248,8 +254,8 @@ int modulate_voice_skin_helper_generate(void* voice_skin,
 // Using a different sample rate in modulate_voice_skin_helper_generate
 // won't crash anything, but may cause glitches in the audio for the
 // first few frames after the sample rate change.
-int modulate_voice_skin_helper_reset(void* voice_skin_helper,
-                                     unsigned int expected_sample_rate);
+MODULATE_DEF_PREFIX int modulate_voice_skin_helper_reset(void* voice_skin_helper,
+                                                         unsigned int expected_sample_rate);
 
 #ifdef __cplusplus
 }
