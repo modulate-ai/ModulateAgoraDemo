@@ -24,6 +24,11 @@
 	<string>We don't actually use the camera - but the embedded Agora SDK can, so we are required to have this description.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>The microphone is used while in a voice call to record audio input</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>audio</string>
+		<string>voip</string>
+	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
